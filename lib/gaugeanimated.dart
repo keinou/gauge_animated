@@ -1,4 +1,5 @@
 library gaugeanimated;
+
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -6,11 +7,11 @@ import 'package:flutter/material.dart';
 class GaugeAnimated {
   static Widget build(
       {@required Driver driver,
-        @required Widget centerWidget,
-        @required Color fullColor,
-        @required Color percentColor,
-        @required double fullWidth,
-        @required double percentWidth}) {
+      @required Widget centerWidget,
+      @required Color fullColor,
+      @required Color percentColor,
+      @required double fullWidth,
+      @required double percentWidth}) {
     return Center(
         child: AnimatedGauge(
             driver: driver,
@@ -18,8 +19,7 @@ class GaugeAnimated {
             fullColor: fullColor,
             percentColor: percentColor,
             fullWidth: fullWidth,
-            percentWidth: percentWidth
-        ));
+            percentWidth: percentWidth));
   }
 }
 
@@ -48,12 +48,12 @@ class Driver {
 class AnimatedGauge extends StatefulWidget {
   AnimatedGauge(
       {Key key,
-        @required this.driver,
-        this.centerWidget,
-        @required this.fullColor,
-        @required this.percentColor,
-        @required this.fullWidth,
-        @required this.percentWidth})
+      @required this.driver,
+      this.centerWidget,
+      @required this.fullColor,
+      @required this.percentColor,
+      @required this.fullWidth,
+      @required this.percentWidth})
       : super(key: key);
 
   final Driver driver;
@@ -74,8 +74,6 @@ class GaugeState extends State<AnimatedGauge>
 
   GaugeState({Widget centerWidget});
 
-  String get _readout => (_animation.value).toStringAsFixed(0) + '%';
-
   double begin = 0.0;
   double end = 0.0;
 
@@ -88,9 +86,9 @@ class GaugeState extends State<AnimatedGauge>
   }
 
   void on(dynamic x) => setState(() {
-    begin = end;
-    end = x;
-  });
+        begin = end;
+        end = x;
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -130,10 +128,10 @@ class GaugeState extends State<AnimatedGauge>
 class GaugePainter extends CustomPainter {
   GaugePainter(
       {@required this.percent,
-        @required this.fullColor,
-        @required this.percentColor,
-        @required this.fullWidth,
-        @required this.percentWidth})
+      @required this.fullColor,
+      @required this.percentColor,
+      @required this.fullWidth,
+      @required this.percentWidth})
       : super();
 
   final double percent;
@@ -144,7 +142,6 @@ class GaugePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-
     Paint line = new Paint()
       ..color = fullColor
       ..strokeCap = StrokeCap.butt
