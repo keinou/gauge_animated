@@ -1,6 +1,6 @@
 name: gaugeanimated
 description: A flutter plugin to facilitate the creation of graphic gauge.
-version: 0.5.1
+version: 0.6.1
 homepage: https://github.com/keinou/gauge_animated
 
 environment:
