@@ -9,7 +9,7 @@ You should ensure that you add the following dependency in your Flutter project.
 
 ```yaml
 dependencies:
- gaugeanimated: ^1.0.8
+ gaugeanimated: ^0.6.2
 ```
 
 You should then run  `flutter packages upgrade`  or update your packages in IntelliJ.

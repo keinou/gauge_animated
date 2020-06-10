@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
+
 import 'package:gaugeanimated/gaugeanimated.dart';
 
 void main() {
@@ -54,17 +56,27 @@ class _MyHomePageState extends State<MyHomePage> {
                 fullColor: Colors.black,
                 percentColor: Colors.indigo[400].withOpacity(0.8),
                 fullWidth: 4,
-                percentWidth: 10),
+                percentWidth: 10,
+              ),
             ),
             Container(
-              child: GaugeAnimated.build(
-                driver: driver,
-                centerWidget: exampleWidget(),
-                fullColor: Colors.black,
-                percentColor: Colors.red,
-                fullWidth: 15,
-                percentWidth: 4),
-            )
+                child: GaugeAnimated.build(
+                    driver: driver,
+                    centerWidget: exampleWidget(),
+                    fullColor: Colors.black,
+                    percentColor: Colors.red,
+                    fullWidth: 10,
+                    percentWidth: 4,
+                    diameter: 280,
+                    percentColorGradient: new SweepGradient(
+                      tileMode: TileMode.mirror,
+                      colors: [
+                        Colors.red,
+                        Colors.blue,
+                      ],
+                      startAngle: 25 * (2 * pi / 60),
+                      endAngle: 40 * (2 * pi / 60)
+                    ))),
           ],
         ),
       ),
@@ -76,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget exampleWidget(){
+  Widget exampleWidget() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,

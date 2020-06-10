@@ -11,15 +11,22 @@ class GaugeAnimated {
       @required Color fullColor,
       @required Color percentColor,
       @required double fullWidth,
-      @required double percentWidth}) {
+      @required double percentWidth,
+      double diameter,
+      SweepGradient fullColorGradient,
+      SweepGradient percentColorGradient}) {
     return Center(
         child: AnimatedGauge(
-            driver: driver,
-            centerWidget: centerWidget,
-            fullColor: fullColor,
-            percentColor: percentColor,
-            fullWidth: fullWidth,
-            percentWidth: percentWidth));
+      driver: driver,
+      centerWidget: centerWidget,
+      fullColor: fullColor,
+      percentColor: percentColor,
+      fullWidth: fullWidth,
+      percentWidth: percentWidth,
+      diameter: diameter,
+      fullColorGradient: fullColorGradient,
+      percentColorGradient: percentColorGradient,
+    ));
   }
 }
 
@@ -43,6 +50,11 @@ class Driver {
     _atual = maxed ? 0 : (_atual + x);
     _controller.add(_atual);
   }
+
+  void remove(double x) {
+    _atual = maxed ? 0 : (_atual - x);
+    _controller.add(_atual);
+  }
 }
 
 class AnimatedGauge extends StatefulWidget {
@@ -53,18 +65,25 @@ class AnimatedGauge extends StatefulWidget {
       @required this.fullColor,
       @required this.percentColor,
       @required this.fullWidth,
-      @required this.percentWidth})
+      @required this.percentWidth,
+      this.diameter,
+      this.fullColorGradient,
+      this.percentColorGradient})
       : super(key: key);
 
   final Driver driver;
   final Widget centerWidget;
   final Color fullColor;
+  final SweepGradient fullColorGradient;
   final Color percentColor;
+  final SweepGradient percentColorGradient;
   final double fullWidth;
   final double percentWidth;
+  final double diameter;
 
   @override
-  GaugeState createState() => GaugeState(centerWidget: centerWidget);
+  GaugeState createState() =>
+      GaugeState(centerWidget: centerWidget, diameter: diameter);
 }
 
 class GaugeState extends State<AnimatedGauge>
@@ -72,8 +91,9 @@ class GaugeState extends State<AnimatedGauge>
   Animation<double> _animation;
   AnimationController _controller;
 
-  GaugeState({Widget centerWidget});
+  GaugeState({Widget centerWidget, this.diameter});
 
+  final double diameter;
   double begin = 0.0;
   double end = 0.0;
 
@@ -92,7 +112,8 @@ class GaugeState extends State<AnimatedGauge>
 
   @override
   Widget build(BuildContext context) {
-    final double _diameter = (MediaQuery.of(context).size.width / 1.616);
+    final double _diameter =
+        widget.diameter ?? (MediaQuery.of(context).size.width / 1.616);
 
     _controller.reset();
     _animation = Tween<double>(begin: begin, end: end).animate(_controller);
@@ -107,57 +128,76 @@ class GaugeState extends State<AnimatedGauge>
     return AnimatedBuilder(
         animation: _animation,
         builder: (context, xWidget) {
-          return CustomPaint(
-              foregroundPainter: GaugePainter(
-                  percent: _animation.value,
-                  fullColor: widget.fullColor,
-                  percentColor: widget.percentColor,
-                  fullWidth: widget.fullWidth,
-                  percentWidth: widget.percentWidth),
-              child: Container(
-                  constraints: BoxConstraints.expand(
-                      height: _diameter, width: _diameter),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: widget.centerWidget ?? Container(),
-                  )));
+          return Stack(
+            children: [
+              CustomPaint(
+                  foregroundPainter: GaugePainter(
+                    percent: _animation.value,
+                    fullColor: widget.fullColor,
+                    percentColor: widget.percentColor,
+                    fullWidth: widget.fullWidth,
+                    percentWidth: widget.percentWidth,
+                    fullColorGradient: widget.fullColorGradient,
+                    percentColorGradient: widget.percentColorGradient,
+                  ),
+                  child: Container(
+                      constraints: BoxConstraints.expand(
+                          height: _diameter, width: _diameter),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: widget.centerWidget ?? Container(),
+                      ))),
+            ],
+          );
         });
   }
 }
 
 class GaugePainter extends CustomPainter {
-  GaugePainter(
-      {@required this.percent,
-      @required this.fullColor,
-      @required this.percentColor,
-      @required this.fullWidth,
-      @required this.percentWidth})
-      : super();
+  GaugePainter({
+    @required this.percent,
+    @required this.fullColor,
+    @required this.percentColor,
+    @required this.fullWidth,
+    @required this.percentWidth,
+    this.fullColorGradient,
+    this.percentColorGradient,
+  }) : super();
 
   final double percent;
   final Color fullColor;
+  final SweepGradient fullColorGradient;
   final Color percentColor;
+  final SweepGradient percentColorGradient;
   final double fullWidth;
   final double percentWidth;
 
+  double doubleToAngle(double angle) => angle * pi / 180.0;
+
   @override
   void paint(Canvas canvas, Size size) {
-    Paint line = new Paint()
-      ..color = fullColor
-      ..strokeCap = StrokeCap.butt
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = fullWidth;
-
-    Paint elapsedBrush = new Paint()
-      ..strokeWidth = percentWidth
-      ..color = percentColor
-      ..style = PaintingStyle.stroke;
-
     Offset center = new Offset(size.width / 2, size.height / 2);
     double radius = min(size.width / 2.2, size.height / 2.2);
     double angle = 2 * pi / 60; //2 * pi * percent;
-
     Rect rect = new Rect.fromCircle(center: center, radius: radius);
+
+    Paint line = new Paint()
+      ..color = fullColor
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = fullWidth
+      ..shader =
+          (fullColorGradient ?? SweepGradient(colors: [fullColor, fullColor]))
+              .createShader(rect);
+
+    Paint elapsedBrush = new Paint()
+      ..strokeWidth = percentWidth
+      ..strokeCap = StrokeCap.round
+      ..color = percentColor
+      ..style = PaintingStyle.stroke
+      ..shader =
+          (percentColorGradient ?? SweepGradient(colors: [percentColor, percentColor]))
+              .createShader(rect);
 
     canvas.drawArc(rect, 25 * angle, 40 * angle, false, line);
 
